@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write a Review - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --surface: #ffffff;
+      --primary: #1a9e6e;
+      --primary-light: #22c98d;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ─── Dark Navy Base ─── */
+    html, body { background: #0F172A; color: #fff; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0F172A;
+      color: #fff;
+      padding: 24px;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    /* ─── Dark Surface Overrides ─── */
+    .container { position: relative; z-index: 1; }
+    .card {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    h1 { color: #fff !important; }
+    .sub { color: rgba(255,255,255,0.5) !important; }
+    label { color: rgba(255,255,255,0.7) !important; }
+    input, select, textarea {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: #fff !important;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.3) !important; }
+    input:focus, select:focus, textarea:focus { border-color: #10B981 !important; outline: none; }
+    select option { background: #1E293B; color: #fff; }
+    .btn-primary {
+      background: linear-gradient(135deg, #1a9e6e, #22c98d) !important;
+      color: #fff !important; border: none !important;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08) !important;
+      color: rgba(255,255,255,0.8) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14) !important; }
+  </style>
+</head>
+
+<body>
+<div class="bg-mesh"></div>
+<div class="grid-lines"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+<div class="particles" id="particles"></div>
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-star-half-alt"></i> Write a Review</h1>
+      <div class="sub">Share your experience with a medicine</div>
+      <form id="reviewForm">
+        <div class="form-group">
+          <label>Medicine ID *</label>
+          <input type="number" id="medicineId" required placeholder="Enter medicine ID">
+        </div>
+        <div class="form-group">
+          <label>Rating *</label>
+          <select id="rating" required>
+            <option value="1">1 ★ - Poor</option>
+            <option value="2">2 ★★ - Fair</option>
+            <option value="3">3 ★★★ - Good</option>
+            <option value="4">4 ★★★★ - Very Good</option>
+            <option value="5">5 ★★★★★ - Excellent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your Comment *</label>
+          <textarea id="comment" rows="4" required placeholder="Write your review here..."></textarea>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Review</button>
+          <a href="/customer/dashboard.html" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+  <script>
+    const API_BASE = '';
+    const userId = localStorage.getItem('userId') || 1; // replace with actual logged-in user ID
+
+    document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const medicineId = parseInt(document.getElementById('medicineId').value);
+      const rating = parseInt(document.getElementById('rating').value);
+      const comment = document.getElementById('comment').value.trim();
+      if (!medicineId || !comment) {
+        showToast('Please fill all fields', 'error');
+        return;
+      }
+      const payload = { medicineId, userId, rating, comment };
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      try {
+        const res = await fetch(`${API_BASE}/api/customer/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          showToast('Review submitted successfully!');
+          setTimeout(() => window.location.href = 'customer-reviews.html', 1500);
+        } else {
+          const error = await res.text();
+          showToast('Error: ' + error, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+        }
+      } catch (err) {
+        showToast('Server error', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+      }
+    });
+
+    function showToast(msg, type = 'success') {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerText = msg;
+      tc.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    /* ─── Floating Particles ─── */
+    (function() {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+  </script>
+</body>
+
+</html>
