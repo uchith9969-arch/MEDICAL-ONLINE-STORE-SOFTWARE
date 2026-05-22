@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Medicine Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  /* same base styles as previous */
+  :root { --bg: #0F172A; --sidebar-bg:#0a1628; --primary:#1a9e6e; --surface:#fff; --border:#e2e8f0; --text-muted:#64748b; --red:#ef4444; --sidebar-w:260px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background: #0F172A; display:flex; }
+  .sidebar { width:var(--sidebar-w); background:var(--sidebar-bg); position:fixed; height:100vh; }
+  .sidebar-logo { padding:28px 24px; display:flex; gap:12px; color:white; }
+  .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--primary),#22c98d); border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .nav-item { display:flex; gap:12px; padding:11px 14px; color:rgba(255,255,255,0.55); text-decoration:none; }
+  .nav-item.active { background:rgba(26,158,110,0.25); color:white; }
+  .main { margin-left:var(--sidebar-w); flex:1; }
+  .topbar { background:var(--surface); padding:16px 32px; border-bottom:1px solid var(--border); }
+  .content { padding:28px 32px; }
+  .table-card { background:var(--surface); border-radius:14px; overflow:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
+  .btn { padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:white; cursor:pointer; margin:0 4px; }
+  .btn-primary { background:var(--primary); color:white; border:none; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:200; }
+  .modal { background:white; border-radius:18px; padding:24px; width:400px; }
+  .input-field { width:100%; padding:8px; margin:8px 0; border:1px solid var(--border); border-radius:8px; }
+
+    
+    /* ─── Dark Navy Base ─── */
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+    /* ─── Dark Surface Overrides ─── */
+    .topbar {
+      background: rgba(15,23,42,0.85) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(12px);
+      color: #fff !important;
+    }
+    .topbar h2, .topbar-title { color: #fff !important; }
+    .admin-badge { background: rgba(16,185,129,0.15) !important; color: #10B981 !important; }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
+    .stat-label { color: rgba(255,255,255,0.5) !important; }
+    .stat-number, .stat-value { color: #fff !important; }
+
+    .card, .table-card {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .card-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .card-header h3 { color: #fff !important; }
+
+    table { color: #fff !important; }
+    th { background: rgba(255,255,255,0.04) !important; color: rgba(255,255,255,0.45) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    td { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+    tr:hover td { background: rgba(255,255,255,0.04) !important; }
+    tr:last-child td { border-bottom: none !important; }
+
+    .action-btn {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.8) !important;
+    }
+    .action-btn:hover { background: rgba(16,185,129,0.15) !important; border-color: rgba(16,185,129,0.35) !important; color: #10B981 !important; }
+
+    .low-stock-item { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+
+    .modal { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .modal h3 { color: #fff !important; }
+    .form-group label { color: rgba(255,255,255,0.5) !important; }
+    .form-group select, .form-group textarea, .input-field, .search-input, .filter-select {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: #fff !important;
+    }
+    .form-group select:focus, .form-group textarea:focus, .input-field:focus, .search-input:focus { border-color: #10B981 !important; outline: none; }
+
+    .btn-secondary { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14) !important; }
+    .btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.12) !important; }
+    .btn-primary { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+    .btn-add { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+
+    .table-toolbar { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-title { color: #fff !important; }
+
+    .empty-state { color: rgba(255,255,255,0.4) !important; }
+
+    .inventory-content { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .inventory-header h2 { color: #fff !important; }
+    .inventory-info h4, .inventory-info p { color: rgba(255,255,255,0.85) !important; }
+    .inventory-item { border: 1px solid rgba(255,255,255,0.08) !important; }
+    .inventory-item:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important; }
+    .close-btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%) !important; }
+
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon"><i class="fas fa-plus"></i></div><div>Med<span>Admin</span></div></div>
+  <nav>
+    <a class="nav-item" href="dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+    <a class="nav-item" href="admin-users.html">Users</a><a class="nav-item" href="admin-orders.html">Orders</a><a class="nav-item active" href="admin-medicines.html">Medicines</a><a class="nav-item" href="#" id="fileLogsBtn">File Logs</a><a class="nav-item" href="login.html">Logout</a></nav>
+</div>
+<div class="main">
+  <div class="topbar"><h2>Medicine Inventory</h2></div>
+  <div class="content">
+    <div class="table-card">
+      <div style="padding:16px; display:flex; justify-content:space-between;"><h3>Medicines</h3><button class="btn-primary btn" id="addMedicineBtn">+ Add Medicine</button></div>
+      <table id="medicinesTable"><thead><tr><th>ID</th><th>Name</th><th>Price (LKR)</th><th>Stock</th><th>Category</th><th>Prescription?</th><th>Actions</th></tr></thead><tbody id="medicinesTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+<div id="addModal" class="modal-overlay"><div class="modal"><h3>Add Medicine</h3><input id="medName" class="input-field" placeholder="Name"><input id="medPrice" class="input-field" type="number" placeholder="Price"><input id="medStock" class="input-field" type="number" placeholder="Stock"><select id="medCategory" class="input-field"><option value="TABLET">TABLET</option><option value="CAPSULE">CAPSULE</option><option value="SYRUP">SYRUP</option><option value="INJECTION">INJECTION</option><option value="CREAM">CREAM</option><option value="DROPS">DROPS</option></select><label><input type="checkbox" id="medPrescription"> Requires Prescription</label><div style="margin-top:16px;"><button id="saveMedicine" class="btn-primary btn">Save</button><button id="cancelAdd" class="btn">Cancel</button></div></div></div>
+<div id="toastContainer" style="position:fixed; bottom:20px; right:20px; z-index:300;"></div>
+<script>
+  const API = '/api/admin';
+  async function fetchMedicines() {
+    const res = await fetch(`${API}/medicines`);
+    const meds = await res.json();
+    const tbody = document.getElementById('medicinesTbody');
+    tbody.innerHTML = meds.map(m => `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.price}</td><td>${m.stockQuantity}</td><td>${m.category}</td><td>${m.requiresPrescription ? 'Yes' : 'No'}</td><td><button class="btn" onclick="deleteMedicine(${m.id})">Delete</button></td></tr>`).join('');
+  }
+  async function deleteMedicine(id) {
+    if (confirm('Delete this medicine?')) {
+      const res = await fetch(`${API}/medicines/${id}`, { method: 'DELETE' });
+      if (res.ok) { showToast('Deleted'); fetchMedicines(); }
+      else showToast('Delete failed', 'error');
+    }
+  }
+  document.getElementById('addMedicineBtn').onclick = () => document.getElementById('addModal').style.display = 'flex';
+  document.getElementById('cancelAdd').onclick = () => document.getElementById('addModal').style.display = 'none';
+  document.getElementById('saveMedicine').onclick = async () => {
+    const name = document.getElementById('medName').value;
+    const price = parseFloat(document.getElementById('medPrice').value);
+    const stockQuantity = parseInt(document.getElementById('medStock').value);
+    const category = document.getElementById('medCategory').value;
+    const requiresPrescription = document.getElementById('medPrescription').checked;
+    if (!name || isNaN(price) || isNaN(stockQuantity)) { showToast('Fill all fields', 'error'); return; }
+    const res = await fetch(`${API}/medicines`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, price, stockQuantity, category, requiresPrescription, description: '' }) });
+    if (res.ok) { showToast('Medicine added'); fetchMedicines(); document.getElementById('addModal').style.display = 'none'; }
+    else showToast('Failed', 'error');
+  };
+  document.getElementById('fileLogsBtn').onclick = async () => { const res = await fetch(`${API}/file-logs`); alert(await res.text()); };
+  function showToast(msg) { const tc = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className='toast'; t.innerText=msg; tc.appendChild(t); setTimeout(()=>t.remove(),3000); }
+  fetchMedicines();
+
+    
+    /* ─── Floating Particles ─── */
+    (function() {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+  </script>
+</body>
+</html>
