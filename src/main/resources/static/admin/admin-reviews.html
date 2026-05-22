@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Review Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --sidebar-bg: #0a1628;
+      --primary: #1a9e6e;
+      --surface: #fff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --sidebar-w: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #0F172A; display: flex; color: var(--text); }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--sidebar-bg); position: fixed; height: 100vh; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 28px 24px; display: flex; align-items: center; gap: 12px; color: white; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), #22c98d); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: white; }
+    .logo-text span { color: #22c98d; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 14px; border-radius: 8px; margin: 2px 10px; transition: all 0.18s; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(26,158,110,0.25); color: white; }
+    .nav-item i { width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 16px 10px; border-top: 1px solid rgba(255,255,255,0.07); }
+
+    /* Main */
+    .main { margin-left: var(--sidebar-w); flex: 1; }
+    .topbar { background: var(--surface); padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .topbar h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .content { padding: 28px 32px; }
+
+    /* Table card */
+    .table-card { background: var(--surface); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .table-toolbar { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .table-toolbar h3 { font-family: 'Syne', sans-serif; font-size: 15px; }
+    .search-input { margin-left: auto; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px; outline: none; width: 220px; }
+    .search-input:focus { border-color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+    th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); background: #f8fafc; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* Stars */
+    .stars { color: var(--amber); letter-spacing: 1px; font-size: 13px; }
+
+    /* Action buttons */
+    .btn-icon { border: none; background: none; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
+    .btn-edit  { color: var(--primary); background: rgba(26,158,110,0.08); }
+    .btn-edit:hover  { background: rgba(26,158,110,0.18); }
+    .btn-delete { color: var(--red); background: rgba(239,68,68,0.08); }
+    .btn-delete:hover { background: rgba(239,68,68,0.18); }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 16px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s; }
+    @keyframes popIn { from { opacity:0; transform: scale(0.95); } to { opacity:1; transform: scale(1); } }
+    .modal h3 { font-family: 'Syne', sans-serif; font-size: 17px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .form-group select,
+    .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; resize: vertical; }
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--primary); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #168a5e; }
+    .btn-secondary { background: #f1f5f9; color: var(--text); }
+    .btn-secondary:hover { background: var(--border); }
+
+    /* Confirm modal */
+    .confirm-icon { width: 52px; height: 52px; background: rgba(239,68,68,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--red); margin: 0 auto 16px; }
+    .confirm-text { text-align: center; margin-bottom: 20px; }
+    .confirm-text p { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
+
+    /* Toast */
+    #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 300; }
+    .toast { background: #1e293b; color: white; padding: 12px 18px; border-radius: 10px; margin-top: 8px; font-size: 14px; animation: fadeUp 0.2s; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .empty-state { padding: 40px; text-align: center; color: var(--text-muted); }
+  
+    
+    /* ─── Dark Navy Base ─── */
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+    /* ─── Dark Surface Overrides ─── */
+    .topbar {
+      background: rgba(15,23,42,0.85) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(12px);
+      color: #fff !important;
+    }
+    .topbar h2, .topbar-title { color: #fff !important; }
+    .admin-badge { background: rgba(16,185,129,0.15) !important; color: #10B981 !important; }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
+    .stat-label { color: rgba(255,255,255,0.5) !important; }
+    .stat-number, .stat-value { color: #fff !important; }
+
+    .card, .table-card {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .card-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .card-header h3 { color: #fff !important; }
+
+    table { color: #fff !important; }
+    th { background: rgba(255,255,255,0.04) !important; color: rgba(255,255,255,0.45) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    td { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+    tr:hover td { background: rgba(255,255,255,0.04) !important; }
+    tr:last-child td { border-bottom: none !important; }
+
+    .action-btn {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.8) !important;
+    }
+    .action-btn:hover { background: rgba(16,185,129,0.15) !important; border-color: rgba(16,185,129,0.35) !important; color: #10B981 !important; }
+
+    .low-stock-item { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+
+    .modal { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .modal h3 { color: #fff !important; }
+    .form-group label { color: rgba(255,255,255,0.5) !important; }
+    .form-group select, .form-group textarea, .input-field, .search-input, .filter-select {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: #fff !important;
+    }
+    .form-group select:focus, .form-group textarea:focus, .input-field:focus, .search-input:focus { border-color: #10B981 !important; outline: none; }
+
+    .btn-secondary { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14) !important; }
+    .btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.12) !important; }
+    .btn-primary { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+    .btn-add { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+
+    .table-toolbar { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-title { color: #fff !important; }
+
+    .empty-state { color: rgba(255,255,255,0.4) !important; }
+
+    .inventory-content { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .inventory-header h2 { color: #fff !important; }
+    .inventory-info h4, .inventory-info p { color: rgba(255,255,255,0.85) !important; }
+    .inventory-item { border: 1px solid rgba(255,255,255,0.08) !important; }
+    .inventory-item:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important; }
+    .close-btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%) !important; }
+
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon"><i class="fas fa-plus" style="color:white;"></i></div>
+    <div class="logo-text">Medi<span>Admin</span></div>
+  </div>
+  <nav style="padding-top:12px;">
+    <a class="nav-item" href="dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+    <a class="nav-item" href="admin-orders.html"><i class="fas fa-box"></i> Orders</a>
+    <a class="nav-item" href="admin-users.html"><i class="fas fa-users"></i> Users</a>
+    <a class="nav-item" href="admin-medicines.html"><i class="fas fa-pills"></i> Medicines</a>
+    <a class="nav-item active" href="admin-reviews.html"><i class="fas fa-star"></i> Reviews</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-item" href="/login.html" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h2>Review Management</h2>
+    <span style="font-size:13px; color:var(--text-muted);" id="reviewCount"></span>
+  </div>
+  <div class="content">
+    <div class="table-card">
+      <div class="table-toolbar">
+        <h3><i class="fas fa-star" style="color:var(--amber); margin-right:8px;"></i>All Reviews</h3>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search by comment or user...">
+      </div>
+      <div id="tableWrap">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3><i class="fas fa-pen" style="color:var(--primary); margin-right:8px;"></i>Edit Review</h3>
+    <div class="form-group">
+      <label>Rating</label>
+      <select id="editRating">
+        <option value="1">⭐ 1 — Poor</option>
+        <option value="2">⭐⭐ 2 — Fair</option>
+        <option value="3">⭐⭐⭐ 3 — Good</option>
+        <option value="4">⭐⭐⭐⭐ 4 — Very Good</option>
+        <option value="5">⭐⭐⭐⭐⭐ 5 — Excellent</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Comment</label>
+      <textarea id="editComment" rows="4" placeholder="Review comment..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="confirm-icon"><i class="fas fa-trash"></i></div>
+    <div class="confirm-text">
+      <strong>Delete this review?</strong>
+      <p>This action cannot be undone.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn" style="background:var(--red); color:white;" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+  const API = '/api/admin';
+  let reviews = [];
+  let editingId = null;
+  let deletingId = null;
+
+  // Auth guard
+  if (localStorage.getItem('role') !== 'ADMIN') window.location.href = '/login.html';
+
+  async function fetchReviews() {
+    try {
+      const res = await fetch(`${API}/reviews`);
+      reviews = await res.json();
+      renderTable(reviews);
+      document.getElementById('reviewCount').textContent = `${reviews.length} total`;
+    } catch {
+      document.getElementById('tableWrap').innerHTML = '<div class="empty-state">Failed to load reviews.</div>';
+    }
+  }
+
+  function stars(rating) {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  }
+
+  function renderTable(data) {
+    if (!data.length) {
+      document.getElementById('tableWrap').innerHTML = '<div class="empty-state">No reviews found.</div>';
+      return;
+    }
+    const rows = data.map(r => `
+      <tr>
+        <td><strong>#${r.id}</strong></td>
+        <td>User ${r.userId}</td>
+        <td>Medicine ${r.medicineId}</td>
+        <td><span class="stars">${stars(r.rating)}</span> <span style="color:var(--text-muted); font-size:12px;">(${r.rating}/5)</span></td>
+        <td style="max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escHtml(r.comment)}">${escHtml(r.comment)}</td>
+        <td style="color:var(--text-muted); font-size:12px;">${new Date(r.createdAt).toLocaleDateString()}</td>
+        <td>
+          <button class="btn-icon btn-edit" onclick="openEdit(${r.id})" title="Edit"><i class="fas fa-pen"></i></button>
+          <button class="btn-icon btn-delete" onclick="openDelete(${r.id})" title="Delete"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    `).join('');
+    document.getElementById('tableWrap').innerHTML = `
+      <table>
+        <thead><tr><th>ID</th><th>User</th><th>Medicine</th><th>Rating</th><th>Comment</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const filtered = reviews.filter(r =>
+      r.comment?.toLowerCase().includes(q) ||
+      String(r.userId).includes(q) ||
+      String(r.medicineId).includes(q)
+    );
+    renderTable(filtered);
+  });
+
+  // Edit
+  function openEdit(id) {
+    const r = reviews.find(r => r.id === id);
+    if (!r) return;
+    editingId = id;
+    document.getElementById('editRating').value = r.rating;
+    document.getElementById('editComment').value = r.comment;
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeEditModal() {
+    editingId = null;
+    document.getElementById('editModal').classList.remove('open');
+  }
+  async function saveEdit() {
+    const rating = parseInt(document.getElementById('editRating').value);
+    const comment = document.getElementById('editComment').value.trim();
+    if (!comment) { showToast('Comment cannot be empty'); return; }
+    try {
+      const res = await fetch(`${API}/reviews/${editingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating, comment })
+      });
+      if (res.ok) {
+        showToast('Review updated successfully');
+        closeEditModal();
+        fetchReviews();
+      } else {
+        showToast('Failed to update review');
+      }
+    } catch {
+      showToast('Server error');
+    }
+  }
+
+  // Delete
+  function openDelete(id) {
+    deletingId = id;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+  function closeDeleteModal() {
+    deletingId = null;
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+  async function confirmDelete() {
+    try {
+      const res = await fetch(`${API}/reviews/${deletingId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showToast('Review deleted');
+        closeDeleteModal();
+        fetchReviews();
+      } else {
+        showToast('Failed to delete review');
+      }
+    } catch {
+      showToast('Server error');
+    }
+  }
+
+  // Close modals on overlay click
+  document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditModal(); });
+  document.getElementById('deleteModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal(); });
+
+  document.getElementById('logoutBtn').addEventListener('click', e => {
+    e.preventDefault(); localStorage.clear(); window.location.href = '/login.html';
+  });
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function showToast(msg) {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+    tc.appendChild(t); setTimeout(() => t.remove(), 3000);
+  }
+
+  fetchReviews();
+
+    
+    /* ─── Floating Particles ─── */
+    (function() {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+  </script>
+</body>
+</html>
