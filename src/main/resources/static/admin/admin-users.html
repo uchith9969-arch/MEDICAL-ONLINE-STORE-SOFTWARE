@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - User Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F172A;
+    --sidebar-bg: #0a1628;
+    --primary: #1a9e6e;
+    --primary-light: #22c98d;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --red: #ef4444;
+    --radius: 14px;
+    --sidebar-w: 260px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: #0F172A; color: var(--text); display: flex; overflow-x: hidden; }
+  .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100; }
+  .sidebar-logo { padding: 28px 24px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; }
+  .logo-text span { color: var(--primary-light); }
+  .sidebar-nav { flex: 1; padding: 8px 12px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: rgba(255,255,255,0.55); font-size: 0.88rem; font-weight: 500; text-decoration: none; margin-bottom: 2px; }
+  .nav-item i { width: 18px; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: linear-gradient(135deg, rgba(26,158,110,0.25), rgba(34,201,141,0.12)); color: #fff; border: 1px solid rgba(26,158,110,0.3); }
+  .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .nav-item.logout { color: rgba(239,68,68,0.7); }
+  .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 700; }
+  .content { padding: 28px 32px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; gap: 16px; }
+  .stat-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .stat-icon.green { background: rgba(26,158,110,0.12); color: var(--primary); }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; }
+  .table-card { background: var(--surface); border-radius: var(--radius); overflow: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .table-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .table-title { font-weight: 700; margin-right: auto; }
+  .search-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; width: 220px; }
+  .filter-select { padding: 8px 32px 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+  .btn-add { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .badge-admin { background: rgba(37,99,235,0.1); color: #2563eb; }
+  .badge-supplier { background: rgba(251,191,36,0.12); color: #b45309; }
+  .badge-customer { background: rgba(99,102,241,0.1); color: #6366f1; }
+  .btn-icon { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; margin: 0 4px; }
+  .btn-icon:hover.delete { border-color: var(--red); color: var(--red); }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; }
+  .modal { background: var(--surface); border-radius: 18px; padding: 32px; max-width: 400px; text-align: center; }
+  .modal-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 300; }
+  .toast { background: #333; color: white; padding: 12px 18px; border-radius: 10px; margin-top: 8px; }
+  @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } }
+
+    
+    /* ─── Dark Navy Base ─── */
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+    /* ─── Dark Surface Overrides ─── */
+    .topbar {
+      background: rgba(15,23,42,0.85) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(12px);
+      color: #fff !important;
+    }
+    .topbar h2, .topbar-title { color: #fff !important; }
+    .admin-badge { background: rgba(16,185,129,0.15) !important; color: #10B981 !important; }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
+    .stat-label { color: rgba(255,255,255,0.5) !important; }
+    .stat-number, .stat-value { color: #fff !important; }
+
+    .card, .table-card {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .card-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .card-header h3 { color: #fff !important; }
+
+    table { color: #fff !important; }
+    th { background: rgba(255,255,255,0.04) !important; color: rgba(255,255,255,0.45) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    td { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+    tr:hover td { background: rgba(255,255,255,0.04) !important; }
+    tr:last-child td { border-bottom: none !important; }
+
+    .action-btn {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.8) !important;
+    }
+    .action-btn:hover { background: rgba(16,185,129,0.15) !important; border-color: rgba(16,185,129,0.35) !important; color: #10B981 !important; }
+
+    .low-stock-item { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+
+    .modal { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .modal h3 { color: #fff !important; }
+    .form-group label { color: rgba(255,255,255,0.5) !important; }
+    .form-group select, .form-group textarea, .input-field, .search-input, .filter-select {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: #fff !important;
+    }
+    .form-group select:focus, .form-group textarea:focus, .input-field:focus, .search-input:focus { border-color: #10B981 !important; outline: none; }
+
+    .btn-secondary { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14) !important; }
+    .btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.12) !important; }
+    .btn-primary { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+    .btn-add { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+
+    .table-toolbar { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-title { color: #fff !important; }
+
+    .empty-state { color: rgba(255,255,255,0.4) !important; }
+
+    .inventory-content { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .inventory-header h2 { color: #fff !important; }
+    .inventory-info h4, .inventory-info p { color: rgba(255,255,255,0.85) !important; }
+    .inventory-item { border: 1px solid rgba(255,255,255,0.08) !important; }
+    .inventory-item:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important; }
+    .close-btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%) !important; }
+
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon"><i class="fas fa-plus"></i></div><div class="logo-text">Med<span>Admin</span></div></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+    <a class="nav-item active" href="admin-users.html"><i class="fas fa-users"></i> Users</a>
+    <a class="nav-item" href="admin-orders.html"><i class="fas fa-shopping-bag"></i> Orders</a>
+    <a class="nav-item" href="admin-medicines.html"><i class="fas fa-pills"></i> Medicines</a>
+    <a class="nav-item" href="#" id="fileLogsBtn"><i class="fas fa-file-alt"></i> File Logs</a>
+  </nav>
+  <div class="sidebar-footer"><a class="nav-item logout" href="login.html"><i class="fas fa-right-from-bracket"></i> Logout</a></div>
+</div>
+<div class="main">
+  <div class="topbar"><div class="topbar-title">User Management</div></div>
+  <div class="content">
+    <div class="stats-row" id="statsRow"><div class="stat-card"><div class="stat-icon green"><i class="fas fa-users"></i></div><div><div class="stat-value" id="totalUsers">-</div><div>Total Users</div></div></div></div>
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">All Users</div><input type="text" id="search" class="search-input" placeholder="Search by name or email"><select id="roleFilter" class="filter-select"><option value="">All Roles</option><option value="ADMIN">Admin</option><option value="SUPPLIER">Supplier</option><option value="CUSTOMER">Customer</option></select><button class="btn-add" id="addUserBtn"><i class="fas fa-plus"></i> Add User</button></div>
+      <table id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody id="usersTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+<div id="addUserModal" class="modal-overlay"><div class="modal"><h3>Add User</h3><input type="text" id="newName" placeholder="Full Name" style="width:100%; padding:8px; margin:10px 0"><input type="email" id="newEmail" placeholder="Email"><select id="newRole"><option value="CUSTOMER">Customer</option><option value="SUPPLIER">Supplier</option><option value="ADMIN">Admin</option></select><input type="password" id="newPassword" placeholder="Password"><div class="modal-actions"><button class="btn-add" id="confirmAdd">Save</button><button class="btn-icon" id="closeModal">Cancel</button></div></div></div>
+<div id="deleteModal" class="modal-overlay"><div class="modal"><p>Delete user <span id="deleteUserName"></span>?</p><div class="modal-actions"><button class="btn-add" id="confirmDelete">Yes</button><button id="cancelDelete">No</button></div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<script>
+  const API = '/api/admin';
+  let users = [];
+  let deleteUserId = null;
+
+  async function fetchStats() {
+    const res = await fetch(`${API}/stats`);
+    const stats = await res.json();
+    document.getElementById('totalUsers').innerText = stats.totalUsers;
+  }
+  async function fetchUsers() {
+    const res = await fetch(`${API}/users`);
+    users = await res.json();
+    filterAndRender();
+  }
+  function filterAndRender() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const roleFilter = document.getElementById('roleFilter').value;
+    let filtered = users.filter(u => (u.name?.toLowerCase().includes(searchTerm) || u.email?.toLowerCase().includes(searchTerm)) && (!roleFilter || u.role === roleFilter));
+    const tbody = document.getElementById('usersTbody');
+    tbody.innerHTML = filtered.map(u => `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td><span class="badge badge-${u.role.toLowerCase()}">${u.role}</span></td><td><button class="btn-icon delete" onclick="openDeleteModal(${u.id}, '${u.name}')"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+  }
+  function openDeleteModal(id, name) {
+    deleteUserId = id;
+    document.getElementById('deleteUserName').innerText = name;
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+  async function deleteUser() {
+    if (!deleteUserId) return;
+    const res = await fetch(`${API}/users/${deleteUserId}`, { method: 'DELETE' });
+    if (res.ok) { showToast('User deleted'); fetchUsers(); fetchStats(); }
+    else showToast('Delete failed', 'error');
+    document.getElementById('deleteModal').style.display = 'none';
+  }
+  document.getElementById('confirmDelete').onclick = deleteUser;
+  document.getElementById('cancelDelete').onclick = () => document.getElementById('deleteModal').style.display = 'none';
+  document.getElementById('addUserBtn').onclick = () => document.getElementById('addUserModal').style.display = 'flex';
+  document.getElementById('closeModal').onclick = () => document.getElementById('addUserModal').style.display = 'none';
+  document.getElementById('confirmAdd').onclick = async () => {
+    const name = document.getElementById('newName').value;
+    const email = document.getElementById('newEmail').value;
+    const role = document.getElementById('newRole').value;
+    const password = document.getElementById('newPassword').value;
+    if (!name || !email || !password) { showToast('All fields required', 'error'); return; }
+    const res = await fetch(`${API}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, role }) });
+    if (res.ok) { showToast('User added'); fetchUsers(); fetchStats(); document.getElementById('addUserModal').style.display = 'none'; }
+    else showToast('Failed', 'error');
+  };
+  document.getElementById('search').addEventListener('input', filterAndRender);
+  document.getElementById('roleFilter').addEventListener('change', filterAndRender);
+  document.getElementById('fileLogsBtn').onclick = async () => {
+    const res = await fetch(`${API}/file-logs`);
+    const logs = await res.text();
+    alert(logs);
+  };
+  function showToast(msg, type='success') { const tc = document.getElementById('toastContainer'); const t = document.createElement('div'); t.className='toast'; t.innerText=msg; tc.appendChild(t); setTimeout(()=>t.remove(),3000); }
+  fetchStats(); fetchUsers();
+
+    
+    /* ─── Floating Particles ─── */
+    (function() {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+  </script>
+</body>
+</html>
