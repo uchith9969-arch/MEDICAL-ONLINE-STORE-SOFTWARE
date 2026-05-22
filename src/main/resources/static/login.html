@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediCore – Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --emerald: #10B981;
+      --emerald-dark: #059669;
+      --emerald-light: #D1FAE5;
+      --teal: #0D9488;
+      --navy: #0F172A;
+      --slate: #1E293B;
+      --muted: #64748B;
+      --border: rgba(255,255,255,0.12);
+      --glass: rgba(255,255,255,0.06);
+      --glass-hover: rgba(255,255,255,0.10);
+      --white: #FFFFFF;
+      --error: #F87171;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    .bg-orb {
+      position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0;
+    }
+    .orb1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(16,185,129,0.3) 0%, transparent 70%);
+      top: -160px; left: -120px;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+    .orb2 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%);
+      bottom: -100px; right: -80px;
+      animation: orbFloat 15s ease-in-out infinite alternate-reverse;
+    }
+    .orb3 {
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+      top: 50%; left: 60%;
+      animation: orbFloat 9s ease-in-out infinite alternate;
+    }
+
+    @keyframes orbFloat {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%;
+      background: rgba(16,185,129,0.5);
+      animation: particleDrift linear infinite;
+    }
+
+    @keyframes particleDrift {
+      from { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.6; }
+      to   { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ─── Page Layout ─── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ─── Left Panel ─── */
+    .left-panel {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 3rem 4rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+      animation: slideInLeft 0.8s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 3.5rem;
+    }
+
+    .brand-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 30px rgba(16,185,129,0.4);
+    }
+
+    .brand-icon svg { width: 24px; height: 24px; color: #fff; }
+
+    .brand-name {
+      font-size: 22px; font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, rgba(16,185,129,0.9));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px; font-weight: 500; color: var(--emerald);
+      margin-bottom: 1.5rem;
+      width: fit-content;
+    }
+
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--emerald);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 800; line-height: 1.1;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 15px; color: rgba(255,255,255,0.5);
+      line-height: 1.7; max-width: 380px;
+      margin-bottom: 3rem;
+    }
+
+    .stats-row {
+      display: flex; gap: 2rem;
+    }
+
+    .stat {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .stat-num {
+      font-size: 22px; font-weight: 700;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 400;
+    }
+
+    /* ─── Floating Medical Chips ─── */
+    .medical-visual {
+      position: absolute; bottom: 3rem; right: 2rem;
+      display: flex; flex-direction: column; gap: 12px;
+      opacity: 0.5;
+    }
+
+    .med-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 14px;
+      font-size: 12px; color: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .med-chip svg { width: 14px; height: 14px; color: var(--emerald); }
+
+    /* ─── Right Panel ─── */
+    .right-panel {
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      animation: slideInRight 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── Auth Card ─── */
+    .auth-card {
+      width: 100%; max-width: 440px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 28px;
+      padding: 2.5rem;
+      backdrop-filter: blur(30px);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(16,185,129,0.5), transparent);
+    }
+
+    .card-header { margin-bottom: 2rem; }
+
+    .card-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+      color: var(--emerald); text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 26px; font-weight: 700; line-height: 1.2;
+      color: var(--white);
+    }
+
+    .card-subtitle {
+      font-size: 14px; color: rgba(255,255,255,0.45);
+      margin-top: 6px;
+    }
+
+    /* ─── Form Fields ─── */
+    .form { display: flex; flex-direction: column; gap: 18px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+
+    .field-label {
+      font-size: 12.5px; font-weight: 500;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.02em;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex; align-items: center;
+    }
+
+    .input-icon {
+      position: absolute; left: 14px;
+      display: flex; align-items: center;
+      pointer-events: none; z-index: 1;
+    }
+
+    .input-icon svg { width: 16px; height: 16px; color: rgba(255,255,255,0.3); transition: color 0.25s; }
+
+    .input-wrap:focus-within .input-icon svg { color: var(--emerald); }
+
+    .input-field {
+      width: 100%; height: 50px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 14px;
+      padding: 0 14px 0 44px;
+      font-size: 14px; font-family: 'Poppins', sans-serif;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    }
+
+    .input-field::placeholder { color: rgba(255,255,255,0.2); }
+
+    .input-field:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .input-field:focus {
+      background: rgba(16,185,129,0.06);
+      border-color: rgba(16,185,129,0.5);
+      box-shadow: 0 0 0 4px rgba(16,185,129,0.08);
+    }
+
+    .input-field.error {
+      border-color: rgba(248,113,113,0.5);
+      box-shadow: 0 0 0 4px rgba(248,113,113,0.08);
+    }
+
+    /* ─── Show Password Toggle ─── */
+    .pw-toggle {
+      position: absolute; right: 14px;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center;
+      color: rgba(255,255,255,0.3);
+      transition: color 0.2s;
+      padding: 4px;
+    }
+    .pw-toggle:hover { color: rgba(255,255,255,0.7); }
+    .pw-toggle svg { width: 16px; height: 16px; }
+
+    /* ─── Error Toast ─── */
+    .error-toast {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(248,113,113,0.10);
+      border: 1px solid rgba(248,113,113,0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px; color: var(--error);
+      opacity: 0; transform: translateY(-6px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+
+    .error-toast.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .error-toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ─── Options Row ─── */
+    .options-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .remember {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; font-size: 13px; color: rgba(255,255,255,0.5);
+      user-select: none;
+    }
+
+    .remember input[type=checkbox] {
+      width: 16px; height: 16px;
+      accent-color: var(--emerald);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-size: 13px; color: var(--emerald);
+      text-decoration: none; font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 0.75; }
+
+    /* ─── Submit Button ─── */
+    .submit-btn {
+      width: 100%; height: 52px;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 600; font-family: 'Poppins', sans-serif;
+      color: #fff; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 8px 32px rgba(16,185,129,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 4px;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0; transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(16,185,129,0.4); }
+    .submit-btn:hover::before { opacity: 1; }
+    .submit-btn:active { transform: translateY(0); }
+
+    .submit-btn.loading { pointer-events: none; opacity: 0.8; }
+
+    .btn-spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .submit-btn.loading .btn-text { display: none; }
+    .submit-btn.loading .btn-spinner { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Divider ─── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .divider-text { font-size: 12px; color: rgba(255,255,255,0.3); white-space: nowrap; }
+
+    /* ─── Switch Link ─── */
+    .switch-link {
+      text-align: center; font-size: 13.5px; color: rgba(255,255,255,0.45);
+    }
+
+    .switch-link a {
+      color: var(--emerald); text-decoration: none; font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .switch-link a:hover { opacity: 0.75; }
+
+    /* ─── Success Screen ─── */
+    .success-screen {
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; gap: 16px; padding: 1rem 0;
+    }
+
+    .success-screen.show { display: flex; }
+
+    .success-ring {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 40px rgba(16,185,129,0.4);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .success-ring svg { width: 32px; height: 32px; color: #fff; }
+    .success-title { font-size: 20px; font-weight: 700; }
+    .success-sub { font-size: 13.5px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .page { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 1.5rem 1rem; align-items: flex-start; padding-top: 3rem; }
+      .auth-card { padding: 2rem 1.5rem; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+<div class="grid-lines"></div>
+<div class="particles" id="particles"></div>
+
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+        </svg>
+      </div>
+      <span class="brand-name">MediCore</span>
+    </div>
+
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Trusted Medical Platform
+    </div>
+
+    <h1 class="hero-title">
+      Your Health,<br><span>Our Priority</span>
+    </h1>
+
+    <p class="hero-desc">
+      Access thousands of medicines<br> Connect with certified Suppliers<br>All in one secure platform.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-num">50K+</span>
+        <span class="stat-label">MEDICINES</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">200+</span>
+        <span class="stat-label">SUPPLIERS</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">99.9%</span>
+        <span class="stat-label">UPTIME</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="auth-card">
+
+      <!-- FORM VIEW -->
+      <div id="form-view">
+        <div class="card-header">
+          <div class="card-label">Welcome back</div>
+          <div class="card-title">Sign in to MediCore</div>
+          <div class="card-subtitle">Access your medical dashboard securely</div>
+        </div>
+
+        <div class="form">
+
+          <!-- Error Toast -->
+          <div class="error-toast" id="error-toast">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="error-text">Invalid email or password. Please try again.</span>
+          </div>
+
+          <!-- Email -->
+          <div class="field">
+            <label class="field-label">Email address</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+              </span>
+              <input class="input-field" type="email" id="email" placeholder="you@medicore.lk" autocomplete="email"/>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="field">
+            <label class="field-label">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </span>
+              <input class="input-field" type="password" id="password" placeholder="Enter your password" autocomplete="current-password"/>
+              <button class="pw-toggle" id="pw-toggle" onclick="togglePw()" type="button" title="Toggle visibility">
+                <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="options-row">
+            <label class="remember">
+              <input type="checkbox" id="remember"/>
+              Remember me
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button class="submit-btn" id="loginBtn" onclick="handleLogin()">
+            <div class="btn-spinner"></div>
+            <span class="btn-text">Sign In →</span>
+          </button>
+
+          <!-- Divider -->
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span class="divider-text">New to MediCore?</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <!-- Switch -->
+          <div class="switch-link">
+            Don't have an account? <a href="signup.html">Create one free →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUCCESS VIEW -->
+      <div class="success-screen" id="success-view">
+        <div class="success-ring">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="success-title">Welcome Back!</div>
+        <div class="success-sub">You've been signed in successfully.<br>Redirecting to your dashboard…</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── Particles ─── */
+  (function() {
+    var container = document.getElementById('particles');
+    for (var i = 0; i < 18; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var size = Math.random() * 3 + 1.5;
+      p.style.cssText = [
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (Math.random() * 100) + '%',
+        'animation-duration:' + (Math.random() * 18 + 12) + 's',
+        'animation-delay:' + (Math.random() * -20) + 's',
+        'opacity:' + (Math.random() * 0.4 + 0.1)
+      ].join(';');
+      container.appendChild(p);
+    }
+  })();
+
+  /* ─── Show/Hide Password ─── */
+  var pwVisible = false;
+  function togglePw() {
+    pwVisible = !pwVisible;
+    var inp = document.getElementById('password');
+    inp.type = pwVisible ? 'text' : 'password';
+    document.getElementById('eye-icon').innerHTML = pwVisible
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+
+  /* ─── Show Error ─── */
+  function showError(msg) {
+    var toast = document.getElementById('error-toast');
+    var emailInput = document.getElementById('email');
+    var pwInput = document.getElementById('password');
+    document.getElementById('error-text').textContent = msg;
+    toast.classList.add('show');
+    emailInput.classList.add('error');
+    pwInput.classList.add('error');
+    setTimeout(function() {
+      toast.classList.remove('show');
+      emailInput.classList.remove('error');
+      pwInput.classList.remove('error');
+    }, 4000);
+  }
+
+  /* ─── Login Handler (your original API logic) ─── */
+  const API_BASE = '';
+  async function handleLogin() {
+    var email = document.getElementById('email').value.trim();
+    var pw = document.getElementById('password').value;
+
+    if (!email || !pw) {
+      showError('Please fill all fields.');
+      return;
+    }
+
+    var btn = document.getElementById('loginBtn');
+    btn.classList.add('loading');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pw })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.message === 'Login successful') {
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('role', data.role);
+
+        // Show success screen
+        document.getElementById('form-view').style.display = 'none';
+        document.getElementById('success-view').classList.add('show');
+
+        // Redirect after short delay
+        setTimeout(function() {
+          let dashboard = '';
+          if (data.role === 'ADMIN') dashboard = '/admin/dashboard.html';
+          else if (data.role === 'SUPPLIER') dashboard = '/supplier/dashboard.html';
+          else dashboard = '/customer/dashboard.html';
+          window.location.href = dashboard;
+        }, 1500);
+
+      } else {
+        showError(data.message || 'Login failed.');
+        btn.classList.remove('loading');
+      }
+    } catch (err) {
+      showError('Server error. Please try again.');
+      btn.classList.remove('loading');
+    }
+  }
+
+  /* Clear errors on input */
+  ['email', 'password'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      this.classList.remove('error');
+      document.getElementById('error-toast').classList.remove('show');
+    });
+  });
+
+  /* Enter key support */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+</body>
+</html>
