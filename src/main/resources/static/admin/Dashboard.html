@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --sidebar-bg: #0a1628;
+      --primary: #1a9e6e;
+      --primary-light: rgba(26, 158, 110, 0.12);
+      --surface: #fff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --sidebar-w: 260px;
+      --radius: 14px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0F172A;
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .main,
+    .sidebar,
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      position: fixed;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      margin-bottom: 12px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--primary), #22c98d);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .logo-text span {
+      color: #22c98d;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.25);
+      padding: 12px 24px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 8px;
+      margin: 2px 10px;
+      transition: all 0.18s;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .nav-item.active {
+      background: rgba(26, 158, 110, 0.25);
+      color: white;
+    }
+
+    .nav-item i {
+      width: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--surface);
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* ── Stats Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.green {
+      background: rgba(26, 158, 110, 0.12);
+      color: var(--primary);
+    }
+
+    .stat-icon.blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--blue);
+    }
+
+    .stat-icon.amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber);
+    }
+
+    .stat-icon.red {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+    }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Content Row ── */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-header h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .card-link {
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Recent Orders Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 11px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: #f8fafc;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-PENDING {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+
+    .status-DELIVERED {
+      background: #e0e7ff;
+      color: #1e40af;
+    }
+
+    .status-CANCELLED {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* ── Quick Actions ── */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.18s;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: var(--primary-light);
+      border-color: rgba(26, 158, 110, 0.3);
+      color: var(--primary);
+    }
+
+    .action-btn i {
+      width: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    /* ── Low Stock ── */
+    .low-stock-list {
+      padding: 8px 0;
+    }
+
+    .low-stock-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+
+    .low-stock-item:last-child {
+      border-bottom: none;
+    }
+
+    .stock-count {
+      font-weight: 600;
+      color: var(--red);
+      background: #fee2e2;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    /* ── Loading skeleton ── */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f4f8 25%, #e2e8f0 50%, #f0f4f8 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 6px;
+      height: 18px;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    /* ── Toast ── */
+    #toastContainer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 14px;
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .inventory-modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.45);
+      z-index:999;
+      justify-content:center;
+      align-items:center;
+      backdrop-filter:blur(5px);
+    }
+
+    .inventory-content{
+      width:700px;
+      max-height:80vh;
+      overflow-y:auto;
+      background:white;
+      border-radius:24px;
+      padding:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.2);
+      animation:popup 0.25s ease;
+    }
+
+    @keyframes popup{
+      from{
+        transform:scale(0.9);
+        opacity:0;
+      }
+      to{
+        transform:scale(1);
+        opacity:1;
+      }
+    }
+
+    .inventory-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:24px;
+    }
+
+    .close-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      border-radius:12px;
+      background:#f1f5f9;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .close-btn:hover{
+      background:#ef4444;
+      color:white;
+    }
+
+    .inventory-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 18px;
+      border:1px solid #e2e8f0;
+      border-radius:18px;
+      margin-bottom:14px;
+      transition:0.2s;
+    }
+
+    .inventory-item:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 18px rgba(0,0,0,0.08);
+    }
+
+    .inventory-info h4{
+      margin-bottom:6px;
+      font-size:1rem;
+    }
+
+    .inventory-info p{
+      color:#64748b;
+      font-size:0.9rem;
+    }
+
+    .quantity-badge{
+      min-width:70px;
+      text-align:center;
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:700;
+      font-size:0.9rem;
+      background:linear-gradient(135deg,#1a9e6e,#22c98d);
+      color:white;
+    }
+
+    
+    /* ─── Dark Navy Base ─── */
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+    /* ─── Dark Surface Overrides ─── */
+    .topbar {
+      background: rgba(15,23,42,0.85) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(12px);
+      color: #fff !important;
+    }
+    .topbar h2, .topbar-title { color: #fff !important; }
+    .admin-badge { background: rgba(16,185,129,0.15) !important; color: #10B981 !important; }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important; }
+    .stat-label { color: rgba(255,255,255,0.5) !important; }
+    .stat-number, .stat-value { color: #fff !important; }
+
+    .card, .table-card {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      backdrop-filter: blur(16px);
+      color: #fff !important;
+    }
+    .card-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .card-header h3 { color: #fff !important; }
+
+    table { color: #fff !important; }
+    th { background: rgba(255,255,255,0.04) !important; color: rgba(255,255,255,0.45) !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    td { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+    tr:hover td { background: rgba(255,255,255,0.04) !important; }
+    tr:last-child td { border-bottom: none !important; }
+
+    .action-btn {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.8) !important;
+    }
+    .action-btn:hover { background: rgba(16,185,129,0.15) !important; border-color: rgba(16,185,129,0.35) !important; color: #10B981 !important; }
+
+    .low-stock-item { border-bottom: 1px solid rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.85) !important; }
+
+    .modal { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .modal h3 { color: #fff !important; }
+    .form-group label { color: rgba(255,255,255,0.5) !important; }
+    .form-group select, .form-group textarea, .input-field, .search-input, .filter-select {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      color: #fff !important;
+    }
+    .form-group select:focus, .form-group textarea:focus, .input-field:focus, .search-input:focus { border-color: #10B981 !important; outline: none; }
+
+    .btn-secondary { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14) !important; }
+    .btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.12) !important; }
+    .btn-primary { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+    .btn-add { background: linear-gradient(135deg,#1a9e6e,#22c98d) !important; color: #fff !important; border: none !important; }
+
+    .table-toolbar { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-header { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+    .table-title { color: #fff !important; }
+
+    .empty-state { color: rgba(255,255,255,0.4) !important; }
+
+    .inventory-content { background: #1E293B !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .inventory-header h2 { color: #fff !important; }
+    .inventory-info h4, .inventory-info p { color: rgba(255,255,255,0.85) !important; }
+    .inventory-item { border: 1px solid rgba(255,255,255,0.08) !important; }
+    .inventory-item:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.4) !important; }
+    .close-btn { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%) !important; }
+
+  </style>
+</head>
+
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-plus" style="color:white;"></i></div>
+      <div class="logo-text">Medi<span>Admin</span></div>
+    </div>
+    <div class="nav-section-label">Main</div>
+    <a class="nav-item active" href="dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+    
+    <div class="nav-section-label">Manage</div>
+    <a class="nav-item" href="admin-orders.html"><i class="fas fa-box"></i> Orders</a>
+    <a class="nav-item" href="admin-users.html"><i class="fas fa-users"></i> Users</a>
+    <a class="nav-item" href="admin-medicines.html"><i class="fas fa-pills"></i> Medicines</a>
+    <a class="nav-item" href="admin-reviews.html" id="reviewsNavBtn"><i class="fas fa-star"></i> Reviews</a>
+    <a class="nav-item" href="/payment_sandali/payments-list.html"><i class="fas fa-money-bill-wave"></i> Payments</a>
+    <a class="nav-item" href="#" id="fileLogsNavBtn"><i class="fas fa-file-lines"></i> File Logs</a>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="/login.html" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h2>Dashboard Overview</h2>
+      <div class="topbar-right">
+        <span class="admin-badge"><i class="fas fa-shield-halved"></i> Admin</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <!-- Populated by JS -->
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-number skeleton" style="width:60px; height:28px; margin-bottom:6px;"></div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+          <div class="stat-info">
+            <div class="stat-number skeleton" style="width:60px; height:28px; margin-bottom:6px;"></div>
+            <div class="stat-label">Total Orders</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber"><i class="fas fa-coins"></i></div>
+          <div class="stat-info">
+            <div class="stat-number skeleton" style="width:80px; height:28px; margin-bottom:6px;"></div>
+            <div class="stat-label">Total Revenue</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+          <div class="stat-info">
+            <div class="stat-number skeleton" style="width:40px; height:28px; margin-bottom:6px;"></div>
+            <div class="stat-label">Total Medicine Stock</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom row -->
+      <div class="content-row">
+
+        <!-- Recent Orders -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-clock" style="color:var(--primary); margin-right:8px;"></i>Recent Orders</h3>
+            <a class="card-link" href="admin-orders.html">View all →</a>
+          </div>
+          <div id="recentOrdersWrap">
+            <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions + Low Stock -->
+        <div style="display:flex; flex-direction:column; gap:24px;">
+
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-bolt" style="color:var(--amber); margin-right:8px;"></i>Quick Actions</h3>
+            </div>
+            <div class="quick-actions">
+              <a class="action-btn" href="admin-orders.html"><i class="fas fa-box"></i> Manage Orders</a>
+              <a class="action-btn" href="admin-users.html"><i class="fas fa-users"></i> Manage Users</a>
+              <a class="action-btn" href="admin-medicines.html"><i class="fas fa-pills"></i> Medicines</a>
+              <button class="action-btn" id="fileLogsBtn"><i class="fas fa-file-lines"></i> View File Logs</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-triangle-exclamation" style="color:var(--red); margin-right:8px;"></i>Low Stock Alert
+              </h3>
+              <a class="card-link" href="admin-medicines.html">Manage →</a>
+            </div>
+            <div class="low-stock-list" id="lowStockList">
+              <div class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script>
+    const API = '/api/admin';
+
+    // Auth guard
+    const role = localStorage.getItem('role');
+    if (!role || role !== 'ADMIN') window.location.href = '/login.html';
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch(`${API}/stats`);
+        if (!res.ok) throw new Error('Failed to load stats');
+        const data = await res.json();
+        renderStats(data);
+        renderRecentOrders(data.recentOrders || []);
+      } catch (err) {
+        showToast('Error loading dashboard data');
+      }
+
+      loadLowStock();
+    }
+
+    function renderStats(data) {
+      document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+          <div class="stat-number">${data.totalUsers ?? '—'}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+        <div class="stat-info">
+          <div class="stat-number">${data.totalOrders ?? '—'}</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class="fas fa-coins"></i></div>
+        <div class="stat-info">
+          <div class="stat-number">LKR ${data.totalRevenue != null ? Number(data.totalRevenue).toLocaleString() : '—'}</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      <div class="stat-card" onclick="openInventoryModal()" style="cursor:pointer;">
+        <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+        <div class="stat-info">
+            <div class="stat-number">${data.totalMedicineStock ?? '—'}</div>
+            <div class="stat-label">Total Medicine Stock</div>
+        </div>
+      </div>
+    `;
+    }
+
+    function renderRecentOrders(orders) {
+      if (!orders.length) {
+        document.getElementById('recentOrdersWrap').innerHTML = '<div class="empty-state">No recent orders found.</div>';
+        return;
+      }
+      const rows = orders.map(o => `
+      <tr>
+        <td><strong>#${o.id}</strong></td>
+        <td>User ${o.userId}</td>
+        <td>LKR ${Number(o.totalAmount).toLocaleString()}</td>
+        <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+        <td>${new Date(o.orderDate).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+      document.getElementById('recentOrdersWrap').innerHTML = `
+      <table>
+        <thead><tr><th>Order</th><th>User</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    }
+
+    async function loadLowStock() {
+      try {
+        const res = await fetch(`${API}/medicines`);
+        const medicines = await res.json();
+        const low = medicines.filter(m => m.stockQuantity != null && m.stockQuantity <= 10);
+        const list = document.getElementById('lowStockList');
+        if (!low.length) {
+          list.innerHTML = '<div class="empty-state" style="color:var(--primary)"><i class="fas fa-check-circle"></i> All medicines well stocked</div>';
+          return;
+        }
+        list.innerHTML = low.slice(0, 5).map(m => `
+        <div class="low-stock-item">
+          <span>${m.name}</span>
+          <span class="stock-count">${m.stockQuantity} left</span>
+        </div>
+      `).join('');
+      } catch {
+        document.getElementById('lowStockList').innerHTML = '<div class="empty-state">Could not load stock data.</div>';
+      }
+    }
+
+    document.getElementById('fileLogsBtn').addEventListener('click', async () => {
+      try {
+        const res = await fetch(`${API}/file-logs`);
+        const text = await res.text();
+        alert(text || 'No logs found.');
+      } catch {
+        showToast('Could not fetch file logs');
+      }
+    });
+
+    document.getElementById('fileLogsNavBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('fileLogsBtn').click();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = '/login.html';
+    });
+
+    function showToast(msg) {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerText = msg;
+      tc.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    
+    /* ─── Floating Particles ─── */
+    (function() {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+
+    loadDashboard();
+  
+
+    async function openInventoryModal() {
+
+      document.getElementById('inventoryModal').style.display = 'flex';
+
+      const res = await fetch('/api/admin/medicines');
+
+      const medicines = await res.json();
+
+      const inventoryList = document.getElementById('inventoryList');
+
+      inventoryList.innerHTML = medicines.map(med => `
+
+        <div class="inventory-item">
+
+          <div class="inventory-info">
+            <h4>${med.name}</h4>
+
+            <p>
+              Price: LKR ${med.price}
+            </p>
+          </div>
+
+          <div class="quantity-badge">
+            ${med.stockQuantity}
+          </div>
+
+        </div>
+
+      `).join('');
+    }
+
+    function closeInventoryModal(){
+      document.getElementById('inventoryModal').style.display = 'none';
+    }
+
+
+
+
+    
+  </script>
+  <!-- Inventory Modal -->
+  <div id="inventoryModal" class="inventory-modal">
+
+    <div class="inventory-content">
+
+      <div class="inventory-header">
+        <h2>Medicine Inventory</h2>
+
+        <button class="close-btn" onclick="closeInventoryModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+    <div id="inventoryList"></div>
+
+    </div>
+
+  </div>
+
+
+
+
+</body>
+
+</html>
