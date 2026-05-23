@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicine Inventory - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --surface: rgba(255,255,255,0.05);
+      --primary: #1a9e6e;
+      --primary-light: #22c98d;
+      --border: rgba(255,255,255,0.09);
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.5);
+      --red: #ef4444;
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Animated Mesh Background ── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ── Grid Lines ── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(26, 158, 110, 0.35);
+    }
+
+    .btn-outline {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(16,185,129,0.5);
+      color: #10B981;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 40px;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .search-input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .search-input:focus {
+      border-color: #10B981;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    }
+
+    .filter-select {
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 40px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .filter-select option { background: #1e293b; color: #fff; }
+
+    .table-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    th {
+      background: rgba(255,255,255,0.04);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.45);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    td { color: rgba(255,255,255,0.85); }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+    tr:last-child td { border-bottom: none; }
+
+    .stock-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .stock-high {
+      background: rgba(16,185,129,0.18);
+      color: #34d399;
+    }
+
+    .stock-low {
+      background: rgba(239,68,68,0.18);
+      color: #f87171;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .edit-btn { color: #10B981; }
+    .edit-btn:hover { background: rgba(16,185,129,0.15); }
+
+    .delete-btn { color: #f87171; }
+    .delete-btn:hover { background: rgba(239,68,68,0.15); }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    @media (max-width: 640px) {
+      body { padding: 16px; }
+      .header { flex-direction: column; align-items: stretch; }
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-content {
+      background: #1E293B;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 24px;
+      border-radius: 16px;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      animation: popup 0.25s ease;
+      color: #fff;
+    }
+
+    @keyframes popup { from { transform:scale(0.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+    .modal-content h2 { font-family: 'Syne', sans-serif; color: #fff; font-size: 1.1rem; }
+    .modal-content p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+    .modal-content input {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+    }
+
+    .modal-content input:focus {
+      border-color: #10B981;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    }
+
+    .modal-content button {
+      padding: 11px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1a9e6e, #22c98d);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .modal-content button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,158,110,0.3); }
+
+    .close-btn {
+      align-self: flex-end;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      font-size: 20px;
+      cursor: pointer;
+      color: #fff;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: 0.2s;
+    }
+
+    .close-btn:hover { background: #ef4444; }
+
+    .nav-btn {
+      text-decoration: none;
+      padding: 11px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(135deg, #1a9e6e, #22c98d);
+      color: white;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(26,158,110,0.35);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, #1a9e6e, #22c98d);
+      color: white;
+      border: none;
+      box-shadow: 0 8px 20px rgba(26,158,110,0.35);
+    }
+
+    /* ===== Floating Glow Orbs ===== */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ===== Floating Particles ===== */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift { from { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.6; } to { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+
+  </style>
+</head>
+
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1><i class="nav-btn"></i> Browse Medicines</h1>
+      <a href="#" id="dashboardLink" class="nav-btn"><i class="fas fa-home"></i> Dashboard</a>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search by name...">
+      <select id="categoryFilter" class="filter-select">
+        <option value="">All Categories</option>
+        <option value="TABLET">Tablet</option>
+        <option value="CAPSULE">Capsule</option>
+        <option value="SYRUP">Syrup</option>
+        <option value="INJECTION">Injection</option>
+        <option value="CREAM">Cream</option>
+        <option value="DROPS">Drops</option>
+        <option value="OTHER">Other</option>
+      </select>
+      <button id="searchBtn" class="nav-btn"><i class="fas fa-search"></i> Search</button>
+    </div>
+    <div class="table-card">
+      <table id="medicinesTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price (LKR)</th>
+            <th>Stock</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="medicinesTbody">
+          <tr>
+            <td colspan="7" style="text-align:center">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="inventoryModal" class="modal hidden">
+
+    <div class="modal-content">
+
+      <button onclick="closeInventoryModal()" class="close-btn">
+        ×
+      </button>
+
+      <h2>Add Medicine Inventory</h2>
+
+      <input type="hidden" id="medicineId" />
+
+      <p id="medicineName"></p>
+
+      <input type="number" id="quantity" placeholder="Enter quantity" />
+
+      <button onclick="submitInventory()">Add Inventory
+      </button>
+
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = '';
+    let allMedicines = [];
+
+    async function fetchMedicines() {
+      try {
+        const res = await fetch(`${API_BASE}/api/medicines`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        allMedicines = await res.json();
+        renderTable();
+      } catch (err) {
+        showToast('Error loading medicines', 'error');
+      }
+    }
+
+    function renderTable() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      let filtered = allMedicines.filter(m => {
+        const matchName = m.name.toLowerCase().includes(searchTerm);
+        const matchCat = category ? m.category === category : true;
+        return matchName && matchCat;
+      });
+      const tbody = document.getElementById('medicinesTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No medicines found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map(m => `
+      <tr>
+        <td>${m.id}</td>
+        <td><strong>${escapeHtml(m.name)}</strong><br><small>${escapeHtml(m.description || '')}</small></td>
+        <td>LKR ${m.price.toFixed(2)}</td>
+        <td><span class="stock-badge ${m.stockQuantity > 10 ? 'stock-high' : 'stock-low'}">${m.stockQuantity}</span></td>
+        <td>${m.category}</td>
+        <td class="actions">
+
+          ${localStorage.getItem("role") === "SUPPLIER" ? `
+
+            <a href="javascript:void(0)"
+            onclick="openInventoryModal(${m.id}, '${m.name}')"
+            class="action-btn edit-btn"
+            title="Add Inventory">
+
+            <i class="fas fa-plus-circle"></i></a>` : `<a href="/order_thisen/create-order.html?medicineId=${m.id}&medicineName=${encodeURIComponent(m.name)}&price=${m.price}"class="action-btn edit-btn"title="Order Medicine"><i class="fas fa-cart-plus"></i></a>`}</td>
+      </tr>
+    `).join('');
+    }
+
+    async function deleteMedicine(id, name) {
+      if (confirm(`Delete "${name}"? This action cannot be undone.`)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/medicines/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            showToast(`Medicine "${name}" deleted`);
+            fetchMedicines(); // refresh
+          } else {
+            showToast('Delete failed', 'error');
+          }
+        } catch (err) {
+          showToast('Server error', 'error');
+        }
+      }
+    }
+
+    function editMedicine(id) {
+      window.location.href = `edit-medicine.html?id=${id}`;
+    }
+
+    function showToast(msg, type = 'success') {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerText = msg;
+      tc.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function (m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', renderTable);
+    document.getElementById('searchInput').addEventListener('keyup', (e) => { if (e.key === 'Enter') renderTable(); });
+    document.getElementById('categoryFilter').addEventListener('change', renderTable);
+
+    fetchMedicines();
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+      const role = localStorage.getItem("role");
+      const dashboardLink = document.getElementById("dashboardLink");
+
+      if (role === "SUPPLIER") {
+        dashboardLink.href = "/supplier/dashboard.html";
+      }
+      else if (role === "ADMIN") {
+        dashboardLink.href = "/admin/dashboard.html";
+      }
+      else {
+        dashboardLink.href = "/customer/dashboard.html";
+      }
+
+    });
+
+
+
+    function openInventoryModal(medicineId, medicineName) {
+
+      document.getElementById("medicineId").value = medicineId;
+
+      document.getElementById("medicineName").innerText = "Medicine: " + medicineName;
+
+      document.getElementById("inventoryModal").classList.add("show");
+    }
+
+    function closeInventoryModal() {
+      document.getElementById("inventoryModal").classList.remove("show");
+      document.getElementById("quantity").value = "";
+    }
+
+    async function submitInventory() {
+
+      try {
+
+        const medicineId =
+          document.getElementById("medicineId").value;
+
+        const quantity =
+          document.getElementById("quantity").value;
+
+        const supplierId =
+          localStorage.getItem("userId");
+
+        if (!quantity || quantity <= 0) {
+
+          alert("Please enter valid quantity");
+          return;
+        }
+
+        const response = await fetch(
+          "/api/supplier/inventory",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              supplierId: supplierId,
+              medicineId: medicineId,
+              quantity: quantity
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to save inventory");
+        }
+
+        alert("Inventory Added Successfully");
+
+        closeInventoryModal();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert("Error saving inventory");
+      }
+    }
+
+
+    document.getElementById("inventoryModal").classList.remove("show");
+
+    document.getElementById("quantity").value = "";
+
+
+
+
+  
+    /* ===== Floating Particles ===== */
+    (function () {
+      const container = document.getElementById("particles");
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = Math.random() * 3 + 1.5;
+        p.style.cssText = "width:"+size+"px; height:"+size+"px; left:"+Math.random()*100+"%; animation-duration:"+(Math.random()*18+12)+"s; animation-delay:"+(Math.random()*-20)+"s; opacity:"+(Math.random()*0.4+0.1)+";";
+        container.appendChild(p);
+      }
+    })();
+
+  </script>
+</body>
+
+</html>
