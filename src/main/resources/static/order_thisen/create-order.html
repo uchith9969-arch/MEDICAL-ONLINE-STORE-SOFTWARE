@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Order - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --surface: rgba(255,255,255,0.05);
+      --primary: #1a9e6e;
+      --primary-light: #22c98d;
+      --border: rgba(255,255,255,0.1);
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.5);
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift {
+      from { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.6; }
+      to { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .sub {
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 24px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+    }
+
+    input::placeholder { color: rgba(255,255,255,0.35); }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 158, 110, 0.2);
+    }
+
+    select option { background: #1e293b; color: #fff; }
+
+    /* Medicine search row */
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .item-row .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 5px;
+    }
+
+    /* Medicine search dropdown */
+    .medicine-search-wrap { position: relative; }
+
+    .medicine-search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+    }
+
+    .medicine-search-input::placeholder { color: rgba(255,255,255,0.35); }
+
+    .medicine-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 158, 110, 0.2);
+    }
+
+    .medicine-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 50;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .medicine-dropdown.open { display: block; }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: rgba(16,185,129,0.1); }
+
+    .dropdown-item .med-name { font-weight: 500; color: #fff; }
+    .dropdown-item .med-meta { font-size: 12px; color: rgba(255,255,255,0.45); }
+    .dropdown-item .med-stock-low  { color: var(--red);     font-size: 11px; font-weight: 600; }
+    .dropdown-item .med-stock-ok   { color: var(--primary); font-size: 11px; font-weight: 600; }
+
+    .dropdown-empty {
+      padding: 14px;
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+    }
+
+    .selected-medicine-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(26,158,110,0.15);
+      border: 1px solid rgba(26, 158, 110, 0.35);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #22c98d;
+      margin-top: 6px;
+    }
+
+    .selected-medicine-badge.show { display: flex; }
+
+    .badge-clear {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      margin-left: auto;
+      font-size: 14px;
+    }
+    .badge-clear:hover { color: var(--red); }
+
+    .qty-input {
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+    }
+
+    .qty-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 158, 110, 0.2);
+    }
+
+    .price-preview {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+      min-height: 18px;
+    }
+    .price-preview strong { color: var(--primary-light); }
+
+    .btn-remove {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--red);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      align-self: center;
+      transition: all 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn-remove:hover { background: rgba(239,68,68,0.2); }
+
+    .btn-add-item {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 18px;
+      cursor: pointer;
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      transition: all 0.18s;
+    }
+    .btn-add-item:hover { background: #168a5e; }
+
+    /* Order summary */
+    .order-summary {
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    .summary-total {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary-light);
+    }
+
+    .urgent-fee { font-size: 12px; color: var(--amber); margin-top: 2px; }
+
+    .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      transition: all 0.18s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 14px;
+      animation: fadeUp 0.2s;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
+    .nav-btn {
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .nav-btn:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+      border-color: transparent;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background Effects -->
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-plus-circle" style="color:var(--primary-light);margin-right:8px;"></i> Create New Order</h1>
+      <div class="sub">Search for medicines by name and set quantities</div>
+
+      <div class="form-group">
+        <label>Order Type</label>
+        <select id="orderType" onchange="updateSummary()">
+          <option value="REGULAR">Regular (5 days delivery)</option>
+          <option value="URGENT">Urgent (+LKR 500, 1 day delivery)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Order Items</label>
+        <div id="itemsContainer"></div>
+        <button type="button" class="btn-add-item" onclick="addItemRow()">
+          <i class="fas fa-plus"></i> Add Medicine
+        </button>
+      </div>
+
+      <div class="order-summary">
+        <div>
+          <div class="summary-label">Estimated Total</div>
+          <div class="urgent-fee" id="urgentFeeLabel" style="display:none;">Includes LKR 500 urgent fee</div>
+        </div>
+        <div class="summary-total" id="totalDisplay">LKR 0.00</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="submitBtn" onclick="submitOrder()">
+          <i class="fas fa-check"></i> Create Order
+        </button>
+        <a href="order-list.html" class="btn btn-secondary">Cancel</a>
+      </div>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    /* ─── Floating Particles ─── */
+    (function () {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+    const API_BASE = '';
+    let medicines = [];
+    let itemCount = 0;
+    let itemData = {};
+
+    const userId = localStorage.getItem('userId');
+    if (!userId) window.location.href = '/login.html';
+
+    async function loadMedicines() {
+      try {
+        const res = await fetch(`${API_BASE}/api/medicines`);
+        medicines = await res.json();
+      } catch {
+        showToast('Could not load medicines list');
+      }
+    }
+
+    function addItemRow() {
+      const idx = itemCount++;
+      itemData[idx] = null;
+      const container = document.getElementById('itemsContainer');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.id = `itemRow${idx}`;
+      row.innerHTML = `
+        <div>
+          <div class="field-label">Medicine</div>
+          <div class="medicine-search-wrap" id="searchWrap${idx}">
+            <input type="text"
+                   class="medicine-search-input"
+                   id="searchInput${idx}"
+                   placeholder="Type medicine name..."
+                   autocomplete="off"
+                   oninput="onSearch(${idx}, this.value)"
+                   onfocus="showDropdown(${idx})"
+            >
+            <div class="medicine-dropdown" id="dropdown${idx}"></div>
+          </div>
+          <div class="selected-medicine-badge" id="badge${idx}">
+            <i class="fas fa-pills"></i>
+            <span id="badgeText${idx}"></span>
+            <button class="badge-clear" onclick="clearSelection(${idx})" title="Change medicine">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Quantity</div>
+          <input type="number" class="qty-input" id="qty${idx}" placeholder="0" min="1"
+                 oninput="updateSummary()" onchange="validateQty(${idx})">
+          <div class="price-preview" id="pricePreview${idx}"></div>
+        </div>
+        <div style="align-self:end; padding-bottom:2px;">
+          <button class="btn-remove" onclick="removeItemRow(${idx})"><i class="fas fa-trash"></i> Remove</button>
+        </div>
+      `;
+      container.appendChild(row);
+
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById(`searchWrap${idx}`)?.contains(e.target)) {
+          closeDropdown(idx);
+        }
+      });
+    }
+
+    function onSearch(idx, query) {
+      clearSelection(idx, false);
+      const dropdown = document.getElementById(`dropdown${idx}`);
+      if (!query.trim()) { closeDropdown(idx); return; }
+
+      const results = medicines.filter(m =>
+        m.name.toLowerCase().includes(query.toLowerCase())
+      );
+
+      if (!results.length) {
+        dropdown.innerHTML = '<div class="dropdown-empty">No medicines found</div>';
+      } else {
+        dropdown.innerHTML = results.map(m => `
+          <div class="dropdown-item" onclick="selectMedicine(${idx}, ${m.id})">
+            <div>
+              <div class="med-name">${m.name}</div>
+              <div class="med-meta">${m.category ?? ''} · LKR ${m.price}</div>
+            </div>
+            <div>
+              ${m.stockQuantity <= 10
+                ? `<span class="med-stock-low">⚠ ${m.stockQuantity} left</span>`
+                : `<span class="med-stock-ok">✓ In stock</span>`
+              }
+            </div>
+          </div>
+        `).join('');
+      }
+      showDropdown(idx);
+    }
+
+    function showDropdown(idx) {
+      const dd = document.getElementById(`dropdown${idx}`);
+      if (dd && dd.innerHTML) dd.classList.add('open');
+    }
+    function closeDropdown(idx) {
+      document.getElementById(`dropdown${idx}`)?.classList.remove('open');
+    }
+
+    function selectMedicine(idx, medicineId) {
+      const med = medicines.find(m => m.id === medicineId);
+      if (!med) return;
+      itemData[idx] = med;
+      document.getElementById(`searchInput${idx}`).style.display = 'none';
+      closeDropdown(idx);
+      const badge = document.getElementById(`badge${idx}`);
+      badge.classList.add('show');
+      document.getElementById(`badgeText${idx}`).textContent = `${med.name} — LKR ${med.price} each`;
+      updateSummary();
+    }
+
+    function clearSelection(idx, resetInput = true) {
+      itemData[idx] = null;
+      document.getElementById(`badge${idx}`).classList.remove('show');
+      const input = document.getElementById(`searchInput${idx}`);
+      input.style.display = '';
+      if (resetInput) { input.value = ''; input.focus(); }
+      document.getElementById(`pricePreview${idx}`).innerHTML = '';
+      updateSummary();
+    }
+
+    function validateQty(idx) {
+      const med = itemData[idx];
+      const qty = parseInt(document.getElementById(`qty${idx}`).value) || 0;
+      const preview = document.getElementById(`pricePreview${idx}`);
+      if (med && qty > 0) {
+        if (qty > med.stockQuantity) {
+          preview.innerHTML = `<span style="color:var(--red)">⚠ Only ${med.stockQuantity} in stock</span>`;
+        } else {
+          const subtotal = (med.price * qty).toFixed(2);
+          preview.innerHTML = `Subtotal: <strong>LKR ${subtotal}</strong>`;
+        }
+      }
+    }
+
+    function removeItemRow(idx) {
+      document.getElementById(`itemRow${idx}`)?.remove();
+      delete itemData[idx];
+      updateSummary();
+    }
+
+    function updateSummary() {
+      let total = 0;
+      Object.keys(itemData).forEach(idx => {
+        const med = itemData[idx];
+        const qty = parseInt(document.getElementById(`qty${idx}`)?.value) || 0;
+        if (med && qty > 0) {
+          total += med.price * qty;
+          validateQty(idx);
+        }
+      });
+      const isUrgent = document.getElementById('orderType').value === 'URGENT';
+      if (isUrgent) total += 500;
+      document.getElementById('totalDisplay').textContent = `LKR ${total.toFixed(2)}`;
+      document.getElementById('urgentFeeLabel').style.display = isUrgent ? 'block' : 'none';
+    }
+
+    async function submitOrder() {
+      const orderType = document.getElementById('orderType').value;
+      const items = [];
+
+      for (const idx of Object.keys(itemData)) {
+        const med = itemData[idx];
+        const qty = parseInt(document.getElementById(`qty${idx}`)?.value) || 0;
+        if (!med) { showToast('Please select a medicine for all rows'); return; }
+        if (qty <= 0) { showToast('Please enter a valid quantity for all items'); return; }
+        if (qty > med.stockQuantity) { showToast(`Not enough stock for ${med.name}`); return; }
+        items.push({ medicineId: med.id, quantity: qty });
+      }
+
+      if (items.length === 0) { showToast('Add at least one medicine'); return; }
+
+      const payload = { userId: parseInt(userId), orderType, items };
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+
+      try {
+        localStorage.setItem("pendingOrder", JSON.stringify(payload));
+        window.location.href = "/payment_sandali/customer-payment.html";
+        return;
+        if (res.ok) {
+          const order = await res.json();
+          showToast(`Order #${order.id} created successfully!`);
+          setTimeout(() => window.location.href = 'order-list.html', 1500);
+        } else {
+          const err = await res.text();
+          showToast('Error: ' + err);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check"></i> Create Order';
+        }
+      } catch {
+        showToast('Server error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Create Order';
+      }
+    }
+
+    function showToast(msg) {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+      tc.appendChild(t); setTimeout(() => t.remove(), 3500);
+    }
+
+    loadMedicines().then(() => {
+      addItemRow();
+      const params = new URLSearchParams(window.location.search);
+      const medicineId = params.get('medicineId');
+      const medicineName = params.get('medicineName');
+      if (!medicineId) return;
+      const idx = 0;
+      const input = document.getElementById(`searchInput${idx}`);
+      const badge = document.getElementById(`badge${idx}`);
+      const badgeText = document.getElementById(`badgeText${idx}`);
+      if (input) {
+        input.value = medicineName;
+        input.style.display = 'none';
+        badgeText.innerText = medicineName;
+        badge.style.display = 'flex';
+        const med = medicines.find(m => m.id == medicineId);
+        if (med) itemData[idx] = med;
+      }
+    });
+  </script>
+</body>
+</html>

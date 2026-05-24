@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --surface: rgba(255,255,255,0.05);
+      --primary: #1a9e6e;
+      --primary-light: #22c98d;
+      --border: rgba(255,255,255,0.08);
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.5);
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift {
+      from { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.6; }
+      to { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(26, 158, 110, 0.3);
+    }
+
+    .btn-outline {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.14);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      align-items: center;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .filter-select {
+      padding: 10px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 40px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+    .filter-select option { background: #1e293b; color: #fff; }
+
+    .table-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    th {
+      background: rgba(255,255,255,0.04);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.45);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    td { color: rgba(255,255,255,0.85); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-PENDING   { background: #fef3c7; color: #b45309; }
+    .status-PAID      { background: #d1fae5; color: #065f46; }
+    .status-DELIVERED { background: #e0e7ff; color: #1e40af; }
+    .status-CANCELLED { background: #fee2e2; color: #991b1b; }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .cancel-btn { color: var(--yellow); }
+    .cancel-btn:hover { background: rgba(245, 158, 11, 0.15); }
+
+    .delete-btn { color: var(--red); }
+    .delete-btn:hover { background: rgba(239, 68, 68, 0.15); }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 14px;
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
+    .nav-btn {
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+      border-color: transparent;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      border: none;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 16px; }
+      .header { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background Effects -->
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-shopping-bag" style="color:var(--primary-light);margin-right:4px;"></i> Order Management</h1>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/customer/dashboard.html" class="nav-btn"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/medicine_samod/medicine-list.html" class="nav-btn"><i class="fas fa-pills"></i> Medicines</a>
+        <a href="/review_hansaja/add-review.html" class="nav-btn"><i class="fas fa-star"></i> Write Review</a>
+        <a href="create-order.html" class="nav-btn"><i class="fas fa-plus"></i> Create Order</a>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <label>Filter by status:</label>
+      <select id="statusFilter" class="filter-select">
+        <option value="">All</option>
+        <option value="PENDING">Pending</option>
+        <option value="DELIVERED">Delivered</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+      <button id="refreshBtn" class="btn btn-outline"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+
+    <div class="table-card">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>User ID</th>
+            <th>Total (LKR)</th>
+            <th>Status</th>
+            <th>Order Date</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTbody">
+          <tr>
+            <td colspan="7" style="text-align:center; color:rgba(255,255,255,0.4);">Loading orders...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    /* ─── Floating Particles ─── */
+    (function () {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+    const API_BASE = '';
+    let allOrders = [];
+
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders`);
+        if (!res.ok) throw new Error('Failed to fetch orders');
+        allOrders = await res.json();
+        renderOrders();
+      } catch (err) {
+        showToast('Error loading orders', 'error');
+      }
+    }
+
+    function renderOrders() {
+      const status = document.getElementById('statusFilter').value;
+      let filtered = status ? allOrders.filter(o => o.status === status) : allOrders;
+      const tbody = document.getElementById('ordersTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:rgba(255,255,255,0.4);">No orders found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map(order => `
+        <tr>
+          <td><strong>#${order.id}</strong></td>
+          <td>${order.userId}</td>
+          <td>LKR ${order.totalAmount.toFixed(2)}</td>
+          <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+          <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+          <td>${order.orderType}</td>
+          <td class="actions">
+            <a href="order-detail.html?id=${order.id}" class="btn btn-outline" style="font-size:0.8rem; padding:6px 12px;">
+              <i class="fas fa-eye"></i> View
+            </a>
+            ${order.status === 'PENDING' ? `
+            <button class="action-btn cancel-btn" onclick="cancelOrder(${order.id})" title="Cancel Order">
+              <i class="fas fa-ban"></i> Cancel
+            </button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+          showToast(`Order ${orderId} status updated to ${newStatus}`);
+          fetchOrders();
+        } else {
+          const error = await res.text();
+          showToast('Update failed: ' + error, 'error');
+        }
+      } catch (err) {
+        showToast('Server error', 'error');
+      }
+    }
+
+    async function cancelOrder(orderId) {
+      if (confirm(`Cancel order #${orderId}?`)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/orders/${orderId}/cancel`, { method: 'PUT' });
+          if (res.ok) {
+            showToast(`Order ${orderId} cancelled`);
+            fetchOrders();
+          } else {
+            const error = await res.text();
+            showToast('Cancel failed: ' + error, 'error');
+          }
+        } catch (err) {
+          showToast('Server error', 'error');
+        }
+      }
+    }
+
+    async function deleteOrder(orderId) {
+      if (confirm(`Permanently delete order #${orderId}? This cannot be undone.`)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/orders/${orderId}`, { method: 'DELETE' });
+          if (res.ok) {
+            showToast(`Order ${orderId} deleted`);
+            fetchOrders();
+          } else {
+            const error = await res.text();
+            showToast('Delete failed: ' + error, 'error');
+          }
+        } catch (err) {
+          showToast('Server error', 'error');
+        }
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerText = msg;
+      tc.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', renderOrders);
+    document.getElementById('refreshBtn').addEventListener('click', fetchOrders);
+    fetchOrders();
+  </script>
+</body>
+
+</html>

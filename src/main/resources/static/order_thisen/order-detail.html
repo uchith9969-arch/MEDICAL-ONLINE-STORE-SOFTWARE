@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details - MediCore</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --surface: rgba(255,255,255,0.05);
+      --primary: #1a9e6e;
+      --primary-light: #22c98d;
+      --border: rgba(255,255,255,0.08);
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.5);
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #0F172A;
+      color: #fff;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ─── Animated Mesh Background ─── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(16,185,129,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 80%, rgba(13,148,136,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 100%);
+    }
+
+    /* ─── Grid Lines ─── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── Floating Glow Orbs ─── */
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(16,185,129,0.30) 0%, transparent 70%); top: -160px; left: -120px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%); bottom: -100px; right: -80px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+    .orb3 { width: 240px; height: 240px; background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%); top: 50%; left: 60%; animation: orbFloat 9s ease-in-out infinite alternate; }
+    @keyframes orbFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ─── Floating Particles ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(16,185,129,0.5); animation: particleDrift linear infinite; }
+    @keyframes particleDrift {
+      from { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.6; }
+      to { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.85);
+    }
+
+    .info-row:last-of-type { border-bottom: none; }
+
+    .info-label {
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-PENDING  { background: #fef3c7; color: #b45309; }
+    .status-PAID     { background: #d1fae5; color: #065f46; }
+    .status-DELIVERED{ background: #e0e7ff; color: #1e40af; }
+    .status-CANCELLED{ background: #fee2e2; color: #991b1b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    th {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.04);
+    }
+
+    td { color: rgba(255,255,255,0.85); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.04); }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.18s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+
+    .btn-outline {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.14); }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-danger:hover { background: #dc2626; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-top: 8px;
+      font-size: 14px;
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background Effects -->
+  <div class="bg-mesh"></div>
+  <div class="grid-lines"></div>
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-receipt"></i> Order Details</h1>
+      <div id="orderLoading" class="loading">Loading order data...</div>
+      <div id="orderContent" style="display: none;">
+        <div class="info-row"><span class="info-label">Order ID:</span><span id="orderId">-</span></div>
+        <div class="info-row"><span class="info-label">User ID:</span><span id="userId">-</span></div>
+        <div class="info-row"><span class="info-label">Total Amount:</span><span id="totalAmount">-</span></div>
+        <div class="info-row"><span class="info-label">Order Date:</span><span id="orderDate">-</span></div>
+        <div class="info-row"><span class="info-label">Order Type:</span><span id="orderType">-</span></div>
+        <div class="info-row"><span class="info-label">Status:</span><span id="statusSpan"></span></div>
+        <div class="info-row"><span class="info-label">Priority:</span><span id="priority">-</span></div>
+        <div class="info-row"><span class="info-label">Summary:</span><span id="summary">-</span></div>
+        <div style="margin-top: 24px;">
+          <h3 style="color:#fff; font-family:'Syne',sans-serif;">Order Items</h3>
+          <table id="itemsTable">
+            <thead>
+              <tr>
+                <th>Medicine ID</th>
+                <th>Quantity</th>
+                <th>Unit Price (LKR)</th>
+                <th>Total (LKR)</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top: 32px; display: flex; gap: 12px;">
+          <button id="cancelOrderBtn" class="btn btn-danger"><i class="fas fa-ban"></i> Cancel Order</button>
+          <a href="order-list.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    /* ─── Floating Particles ─── */
+    (function () {
+      var container = document.getElementById('particles');
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 18 + 12) + 's',
+          'animation-delay:' + (Math.random() * -20) + 's',
+          'opacity:' + (Math.random() * 0.4 + 0.1)
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+    const API_BASE = '';
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('id');
+    if (!orderId) {
+      document.getElementById('orderLoading').innerHTML = 'No order ID provided. <a href="order-list.html" style="color:#22c98d;">Go back</a>';
+    } else {
+      loadOrder(orderId);
+      loadOrderItems(orderId);
+    }
+
+    async function loadOrder(id) {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/${id}`);
+        if (!res.ok) throw new Error('Order not found');
+        const order = await res.json();
+        document.getElementById('orderId').innerText = order.id;
+        document.getElementById('userId').innerText = order.userId;
+        document.getElementById('totalAmount').innerText = `LKR ${order.totalAmount.toFixed(2)}`;
+        document.getElementById('orderDate').innerText = new Date(order.orderDate).toLocaleString();
+        document.getElementById('orderType').innerText = order.orderType;
+        document.getElementById('priority').innerText = order.calculatePriority;
+        document.getElementById('summary').innerText = order.entitySummary;
+        const statusSpan = document.getElementById('statusSpan');
+        statusSpan.innerHTML = `<span class="status-badge status-${order.status}">${order.status}</span>`;
+        document.getElementById('orderLoading').style.display = 'none';
+        document.getElementById('orderContent').style.display = 'block';
+      } catch (err) {
+        document.getElementById('orderLoading').innerHTML = 'Failed to load order. <a href="order-list.html" style="color:#22c98d;">Back to list</a>';
+      }
+    }
+
+    async function loadOrderItems(orderId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/${orderId}/items`);
+        if (!res.ok) throw new Error('Cannot load items');
+        const items = await res.json();
+        const tbody = document.getElementById('itemsTbody');
+        if (items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4">No items in this order</td></tr>';
+          return;
+        }
+        tbody.innerHTML = items.map(item => `
+          <tr>
+            <td>${item.medicineId}</td>
+            <td>${item.quantity}</td>
+            <td>LKR ${item.unitPrice.toFixed(2)}</td>
+            <td>LKR ${item.totalPrice.toFixed(2)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.getElementById('itemsTbody').innerHTML = '<tr><td colspan="4">Error loading items</td></tr>';
+      }
+    }
+
+    document.getElementById('cancelOrderBtn').addEventListener('click', async () => {
+      if (confirm(`Cancel order #${orderId}?`)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/orders/${orderId}/cancel`, { method: 'PUT' });
+          if (res.ok) {
+            showToast(`Order ${orderId} cancelled`);
+            loadOrder(orderId);
+          } else {
+            const error = await res.text();
+            showToast('Cancel failed: ' + error, 'error');
+          }
+        } catch (err) {
+          showToast('Server error', 'error');
+        }
+      }
+    });
+
+    function showToast(msg, type = 'success') {
+      const tc = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerText = msg;
+      tc.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
